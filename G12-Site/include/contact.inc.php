@@ -6,7 +6,6 @@
 //              if all fields valid, the function postContact() is called from functions.inc.php with the vars as parameters; function inserts contact info into the db
 //              if form not submitted because user accessed the page directly, it redirects user to the contact page
 //
-// VULNERABILITY: check for input validation; missing INPUT SANITISATION
 // VULNERABILITY: missing CSRF token, lack of authorisation and authentication (check if functions or other pages control if user is authorized to access the page or perform the action.  )
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
