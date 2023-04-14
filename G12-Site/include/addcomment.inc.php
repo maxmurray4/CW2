@@ -6,8 +6,8 @@
 //              if SQL prep stmts fail, user is redirected to the post.php page and propmpts and error message
 //              if SQL prep stmts is successful, stmts are executed and user is redirected to the blog post they submitted the comment for, with the blogID in the URL
 // ISSUES: PARAMETRISED QUERIES - to be used in addition to prepared stmt
-// VULNERABILITY 1: INPUT SANITISATION missing - code checks if the comment_content field is empty; doesn't sanitise content of the field to prevent SQL injection attacks
-// VULNERABILITY 2: CSRF token missing - include in all forms and requests coming from user
+// 
+// VULNERABILITY 2: CSRF token missing - include it in all forms and requests
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
