@@ -9,18 +9,6 @@
 //                                                                     passwordCheck()  only checks if password inserted by user meets criteria
 //                                                                     pwdMatch() only checks if passwords match
 //                                                                     uidExists() and createUser()  only use prepared tstaments and executes db query
-//
-// ERROR: in function invalidUid(), the preg_match() function is called with three args instead of three:
-// ERROR FIX:  calling function with 2 args - reg ex pattern to match, and the string to match against:
-//function invalidUid($firstName, $lastName) {
-    //$result;
-    //if (!preg_match("/^[a-zA-Z0-9]*$/", $firstName) || !preg_match("/^[a-zA-Z0-9]*$/", $lastName)) {
-       // $result = true;
-    //} else {
-       // $result = false;
-   // }
-   // return $result;
-//}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Checks if number is numeric
