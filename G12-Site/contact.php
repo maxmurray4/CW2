@@ -4,10 +4,7 @@
 //              if session exceeded the session expiration time, redirect user to the logout page, otherwise, update lastActivity time
 //              generate HTML page to include nav bar, login form, registration form ; nav bar links to Home and Contact pages; Post button is displayed for logged in users as well as dropdown menu showing the user's name and links to their Profile and a Sign Out page
 //              implement login and registration forms as modal windows to serve when corresponding links are clicked
-//
-// VULNERABILITY 1: Missing INPUT VALIDATION AND SANITISATION - might be dealt with in functions
 // VULNERABILITY 2: Missing CSRF token
-//
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
