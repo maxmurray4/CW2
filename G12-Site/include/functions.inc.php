@@ -1,14 +1,6 @@
 <?php
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DESCRIPTION: code performs user input validation and sanitisation; includes functions to validate fields: phone number, name, email, password, and to create a new user in the database
-//
-// VULNERABILITY 1: PASSWORD SECURITY - random_bytes() function should be used in addition to hashing the password to make it more difficult for attackers to crack the password using a rainbow table or dictionary attack
-// VULNERABILITY 2: uidExists(), if the mysqli_stmt_prepare() returns false, the user is redirected to an error page - better to return generic error msg such as "An error has occured.."
-// VULNERABILITY 3: header() redirects user to another page, if error occurrs - exit() script after calling header(), to avoid allowing potential attacker to bypass error page and continue executing arbitrary code
-// VULNERABILITY 4: INPUT SANITISATION missing on following functions: emptyInputSignup() function only checks if the input fields are empty
-//                                                                     passwordCheck()  only checks if password inserted by user meets criteria
-//                                                                     pwdMatch() only checks if passwords match
-//                                                                     uidExists() and createUser()  only use prepared tstaments and executes db query
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Checks if number is numeric
@@ -154,7 +146,7 @@ function createUser( $conn, $firstName, $middlename, $lastName, $phoneNumber, $e
 }
 // ----------------------------loginFunctions--------------------------
 // function to check if the username and password field is empty or if the user has inputted data within the fields
-function emptyInputLogin( $username, $password ) {
+function emptyInputLogin( $username, $password) {
     $result;
     if ( empty( $username ) || empty( $password ) ) {
         $result = true;
@@ -166,40 +158,87 @@ function emptyInputLogin( $username, $password ) {
 // function for the user to login to the website by checking the username and password matches with the username and passwords that are stored within the SQL database if it does
 // then the user will be directed to the home page of the website and if the data doesnt match the user will be redirected to the login page to input the data again
 function loginUser( $conn, $userLogin, $password ) {
+/*
+if ($_SESSION['loginAttempts'] >= 5) {
+    // The user has exceeded the maximum number of login attempts.
+    header("Location: ../index.php?loginAttemptsExceeded");
+    exit();
+}
+	*/if (isset($_SESSION['loginAttempts']) ) {
+		$_SESSION['loginAttempts']++;
+	} else {
+		$_SESSION['loginAttempts'] =1;
+	}
+		
+   // header("Location: ../index.php?logerror");
 
-    $stmt = $conn->prepare( "SELECT id, firstName, middleName, lastName, mobile, email, passwordHash FROM user WHERE email = ? OR mobile = ?" );
-    $stmt->bind_param( "ss", $userLogin, $userLogin );
+// Sanitize and validate user input
+$userLogin = filter_input(INPUT_POST, 'userLogin', FILTER_SANITIZE_STRING);
+//$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+
+
+if (!empty($userLogin) && !empty($password)) {
+    // Use prepared statements with placeholders to prevent SQL injection attacks
+    $stmt = $conn->prepare("SELECT id, firstName, middleName, lastName, mobile, email, passwordHash FROM user WHERE email = ? OR mobile = ?");
+    $stmt->bind_param("ss", $userLogin, $userLogin);
     $stmt->execute();
     $stmt->store_result();
-    $stmt->bind_result( $uid, $firstName, $middleName, $lastName, $mobile, $email, $hash );
+    $stmt->bind_result($uid, $firstName, $middleName, $lastName, $mobile, $email, $hash);
 
-    if ( $stmt->num_rows == 1 ) {
+    if ($stmt->num_rows == 1) {
         $stmt->fetch();
-        if ( password_verify( $password, $hash ) ) {
-            session_start();
-            $_SESSION[ 'uid' ] = $uid;
-            $_SESSION[ 'firstName' ] = $firstName;
-            $_SESSION[ 'middleName' ] = $middleName;
-            $_SESSION[ 'lastName' ] = $lastName;
-            $_SESSION[ 'mobileNumber' ] = $mobile;
-            $_SESSION[ 'emailAddress' ] = $email;
-            $_SESSION[ 'loggedIn' ] = true; //set you've logged in
-            $_SESSION[ 'lastActivity' ] = time(); //your last activity was now, having logged in.
-            $_SESSION[ 'expireTime' ] = 15 * 60; //expire time in seconds: 15 minutes
-            $sql = "UPDATE user SET lastLogin=now() WHERE id=?";
-            $stmt = $conn->prepare( $sql );
-            $stmt->bind_param( "i", $uid );
-            $stmt->execute();
-            mysqli_stmt_close( $stmt );
-            header( "Location: ../index.php" );
-        } else {
-            header( "Location: ../index.php?logerror" );
+        if (password_verify($password, $hash)) {
+
+            // Use HTTPS to encrypt the communication between the user's browser and the server
+            if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+                // Set session variables and update user's last login time
+                $_SESSION['uid'] = $uid;
+                $_SESSION['firstName'] = $firstName;
+                $_SESSION['middleName'] = $middleName;
+                $_SESSION['lastName'] = $lastName;
+                $_SESSION['mobileNumber'] = $mobile;
+                $_SESSION['emailAddress'] = $email;
+                $_SESSION['loggedIn'] = true; //set you've logged in
+                $_SESSION['lastActivity'] = time(); //your last activity was now, having logged in.
+                $_SESSION['expireTime'] = 15 * 60; //expire time in seconds: 15 minutes
+                $sql = "UPDATE user SET lastLogin=now() WHERE id=?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $uid);
+                $stmt->execute();
+                mysqli_stmt_close($stmt);
+				unset($_SESSION['loginAttempts']);
+                header("Location: ../index.php");
+                exit();
+            } else {
+                // Redirect user to a secure HTTPS connection
+                header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+                exit();
+            }
+	
+			}
+      
+           header("Location ../index.php");
         }
-    } else {
-        header( "Location: ../index.php?logerror" );
-    }
-    $stmt->close();
+   
+	
+} else {
+    // Redirect user to the login page if the input fields are empty
+    header("Location: ../index.php");
+    exit();
 }
+   $stmt->close();
+}
+function loginAttempts($loginAttempts){
+	
+	$result;
+    if ( $loginAttempts >=5 ) {
+        $result = true;
+    } else {
+        $result = false;
+    }
+    return $result;
+}
+
 // ----------------------------Upload Blog Function--------------------------
 // function to check if the user is trying to post an empty blog
 function emptyInputPost( $blogTitle, $blogImage ) {
