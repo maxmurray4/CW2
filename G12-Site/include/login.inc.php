@@ -2,11 +2,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DESCRIPTION: Checks if submit button was pressed in login form by checking weather the "submit" variable is set in the POST request; if it is , the user's input for login & pawd are stored in vars
 //
-// VULNERABILITIY: Missing CSRF token
+// 
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+session_start();
 if (isset($_POST["submit"])) {
+
 // stores the users login and password into variables
     $userLogin = $_POST["userLogin"];
     $password = $_POST["psw"];
@@ -18,8 +19,11 @@ if (isset($_POST["submit"])) {
         header( "Location: ../index.php?signerror=emptyinput" );
         exit();
     }
+
+	
+	
 // logs the user in as they have inputted the correct informtation
-    loginUser( $conn, $userLogin, $password );
+    loginUser( $conn, $userLogin, $password);
 
 
 } else {
