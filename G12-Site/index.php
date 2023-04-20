@@ -5,7 +5,10 @@
 //              output HTMP and CSS for web page, including nav bar with links to Home and Contact pages
 //              determine if user is logged in using the fisrtName session var, and if it is, display POST button linking to the post.php page; dropdown menu is also included (link to user's profle) & display Sign Out button
 //              if user not logged in(verified with firstName var), display Sing Up and Log In buttons
+//
+// VULNERABILITY 1: user input ($_GET['logerror']) without proper sanitization or validation. This could be a potential security vulnerability( an attacker could inject malicious code through this input). - check if it's dealt with in function.php
 // VULNERABILITY 2: Missing CSRF token
+//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -18,6 +21,11 @@ if(isset($_SESSION['lastActivity'])){
     $_SESSION['lastActivity'] = time();
   }
 }
+echo "Login Attempts = " . $_SESSION['loginAttempts'];
+// generate csrf token
+$csrf_token = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = $csrf_token;
+
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
@@ -91,6 +99,9 @@ header('Content-Type: text/html; charset=utf-8');
             <?php
             if ( isset( $_GET[ "logerror" ] ) ) {
                 echo '<p class="error_txt">Wrong input. Try again!</p>';
+            }
+			if ( isset( $_GET[ "loginAttemptsExceeded" ] ) ) {
+                echo '<p class="error_txt">Too many failled attempts. Try again later!</p>';
             }
             ?>
           </div>
